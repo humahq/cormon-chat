@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Sets up the OpenBook demo on a Mac or a Linux laptop, in one go:
-#   git clone https://github.com/humahq/cormon-chat.git && cd cormon-chat && ./install.sh
+#   gh repo clone humahq/cormon-chat && cd cormon-chat && ./install.sh     (README: the steps before this)
 # It installs the tools, gets the bot's code next to this folder, asks for the OpenAI key (and checks it), makes
 # the passwords, and starts Mattermost, the demo people and the bot's look. Safe to run again: what is already
 # there is kept, and it only asks what it does not know yet.
@@ -84,8 +84,9 @@ done
 if [ -z "$BOT_DIR" ]; then
   BOT_DIR=$(cd "$CHAT/.." && pwd)/correspondence-monitor
   echo "Downloading it to $BOT_DIR"
-  git clone https://github.com/humahq/correspondence-monitor.git "$BOT_DIR" ||
-    fail "Could not download the bot. Ask John to give your GitHub account access to humahq/correspondence-monitor."
+  if command -v gh >/dev/null; then got() { gh repo clone humahq/correspondence-monitor "$BOT_DIR"; }
+  else got() { GIT_TERMINAL_PROMPT=0 git clone https://github.com/humahq/correspondence-monitor.git "$BOT_DIR"; }; fi
+  got || fail "Could not download the bot. Check that you accepted John's GitHub invite to humahq/correspondence-monitor, then run ./install.sh again."
 fi
 setenv .env BOT_DIR "$BOT_DIR"
 (cd "$BOT_DIR" && env -u VIRTUAL_ENV uv sync -q)
