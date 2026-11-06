@@ -9,14 +9,13 @@ MM_IMAGE="${MM_IMAGE:-docker.io/mattermost/mattermost-team-edition:12.1}"
 PG_IMAGE="${PG_IMAGE:-docker.io/library/postgres:16-alpine}"
 POD=cormon-chat
 
-if [ ! -f .env ]; then
-  umask 077
-  {
-    echo "DB_PASSWORD=$(openssl rand -hex 16)"
-    echo "DEMO_PASSWORD=Demo-$(openssl rand -hex 6)!"
-  } > .env
-  echo "made .env (passwords for the database and the demo users; never commit it)"
-fi
+# The passwords are added to .env if they are missing, also when .env was made first by hand (for BOT_DIR)
+umask 077
+touch .env
+[ -z "$(tail -c1 .env)" ] || echo >> .env
+grep -q '^DB_PASSWORD=.' .env || { echo "DB_PASSWORD=$(openssl rand -hex 16)" >> .env; echo "added the database password to .env"; }
+grep -q '^DEMO_PASSWORD=.' .env ||
+  { echo "DEMO_PASSWORD=Demo-$(openssl rand -hex 6)!" >> .env; echo "added the demo users' password to .env (never commit it)"; }
 set -a; . ./.env; set +a
 
 podman pod exists "$POD" || podman pod create --name "$POD" -p 127.0.0.1:8065:8065 >/dev/null
