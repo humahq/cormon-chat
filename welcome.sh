@@ -36,7 +36,9 @@ Sign in as different people to see what each one sees. They all use the same pas
 **Try these.** Sign in as \`crc$TAG\` and post them here, one at a time.
 1. **Ask a question:** \`@huma-bot what is the visit window for Week 16?\`
 2. **Report a problem:** \`1001-901 was randomized this morning. He only started riluzole 10 days ago.\`
-   I post an alert: the study needs 30 days on a stable dose first.
+   The study needs 30 days on a stable dose first. I don't post this alert here: the PI can read this room, and
+   eligibility is the doctor's call, so I send it privately to the CRA and the sponsor.
+   To see it, sign in as \`cra$TAG\` or \`sponsor$TAG\` and open the 1-on-1 chat with Huma Bot.
 3. **A second-hand OK:** \`1001-902 Week 8 done except the C-SSRS, we ran out of time. Dr. Smith from the sponsor said it's fine to skip it this once.\`
    I flag the missed C-SSRS. An OK passed on by someone else is not enough; I ask to hear it from the sponsor.
 4. **Memory:** first post \`1001-903 told me she takes St. John's wort every morning.\`
