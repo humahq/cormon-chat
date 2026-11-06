@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Double-click to start a demo: Podman, Mattermost, the bot and the demo page. Close this window to stop the bot.
-# The bot's folder is BOT_DIR in .env (default: ~/Documents/clinical trial).
+# Run ./install.sh once first. The bot's folder is BOT_DIR in .env (install.sh sets it).
 cd "$(dirname "$0")"
 CHAT=$PWD
 [ -f .env ] && { set -a; . ./.env; set +a; }
 BOT_DIR=${BOT_DIR:-"$HOME/Documents/clinical trial"}
-[ -x "$BOT_DIR/.venv/bin/cormon" ] || { echo "The bot is not in $BOT_DIR: set BOT_DIR in $CHAT/.env"; read -r; exit 1; }
+[ -x "$BOT_DIR/.venv/bin/cormon" ] || { echo "The bot is not set up yet: run ./install.sh in $CHAT first"; read -r; exit 1; }
 
-podman machine start >/dev/null 2>&1 || true
+[ "$(uname -s)" = Darwin ] && { podman machine start ${PODMAN_MACHINE:+"$PODMAN_MACHINE"} >/dev/null 2>&1 || true; }
 ./up.sh || { echo "Mattermost did not start. Press Return to close."; read -r; exit 1; }
 grep -q '^MM_BOT_TOKEN=' .env || ./setup.sh
 ./brand.sh || echo "The OpenBook look was not put on; the demo works without it."
@@ -20,5 +20,6 @@ if ! memory_up; then
     echo "Patient memory did not start; the demo runs without it."
 fi
 
-(sleep 15; open http://localhost:8090; open http://localhost:8065) &
+OPEN=$(command -v open || command -v xdg-open || echo true)
+(sleep 15; "$OPEN" http://localhost:8090; "$OPEN" http://localhost:8065) >/dev/null 2>&1 &
 cd "$BOT_DIR" && exec .venv/bin/cormon chat-demo --chat "$CHAT"

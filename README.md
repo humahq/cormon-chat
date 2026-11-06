@@ -8,37 +8,39 @@ The bot's code is in its own repo, [correspondence-monitor](https://github.com/h
 
 ## Set up a new laptop (once)
 
-You need a Mac, about 4 GB of free memory and an OpenAI API key.
+You need a Mac or Linux laptop, about 6 GB of free memory, an OpenAI API key, and a GitHub account that can see
+both repos (ask John).
 
-1. **Install the tools.** Install [Homebrew](https://brew.sh) if you don't have it. Then, in Terminal:
+1. **Download this repo** into any folder you like (not one that syncs to iCloud, if you can avoid it). In Terminal:
    ```
-   brew install podman uv git
-   podman machine init
-   podman machine start
-   ```
-2. **Download the bot and this chat server** into your Documents folder:
-   ```
-   cd ~/Documents
-   git clone https://github.com/humahq/correspondence-monitor.git "clinical trial"
+   cd ~/where-you-keep-code
    git clone https://github.com/humahq/cormon-chat.git
+   cd cormon-chat
+   ./install.sh
    ```
-3. **Set up the bot:**
-   ```
-   cd ~/Documents/"clinical trial"
-   uv sync
-   echo "OPENAI_API_KEY=your-key-here" > .env
-   ```
-   Put your own OpenAI key in place of `your-key-here`.
-4. **Start it.** In Finder, open `Documents/cormon-chat` and double-click **Start demo.command**. The first time it
-   takes about 5 minutes. It downloads Mattermost and the memory server, then makes the team, the site room, the
-   demo people and the bot. If macOS says it can't open the file, right-click it and choose **Open**.
+2. **Answer its questions.** `install.sh` does every step itself and asks only for:
+   - your OpenAI key (it checks the key with OpenAI before saving it);
+   - a password for signing in to the demo (or press Return for a random one);
+   - yes or no, before it installs a tool you don't have, such as Homebrew or Podman.
 
-If you put the bot somewhere other than `~/Documents/clinical trial`, add `BOT_DIR=/path/to/the/bot` to
-`cormon-chat/.env`.
+   It takes about 10 minutes the first time. What it does:
+   - installs Podman, uv and git if they are missing (Homebrew on a Mac, apt or dnf on Linux);
+   - on a Mac, makes a Podman machine of its own, named `openbook` (4 CPUs, 6 GB), so it doesn't touch any other
+     Podman machine you have;
+   - downloads the bot's code next to this folder, as `correspondence-monitor`, unless it finds it already;
+   - writes both `.env` files (the bot's key, the passwords, and where the bot is), readable only by you;
+   - starts Mattermost and patient memory, and makes the team, the site room, the demo people and the bot.
+
+   At the end it prints the sign-in names and the password. You can run it again at any time; it keeps what is
+   there and only asks for what is missing or wrong.
+
+Podman may print "the system helper service is not installed". That is fine; the demo doesn't need it.
 
 ## Run a demo
 
-Double-click **Start demo.command**. It starts Podman, Mattermost, patient memory and the bot, then opens:
+Double-click **Start demo.command** in the `cormon-chat` folder (on Linux, run `./"Start demo.command"` in a
+terminal). If macOS says it can't open the file, right-click it and choose **Open**. It starts Podman, Mattermost,
+patient memory and the bot, then opens:
 
 - http://localhost:8065: **Mattermost**, the chat itself.
 - http://localhost:8090: **Demo teams**, the list of customer demos.
@@ -86,6 +88,7 @@ room. You can also talk to it alone in a 1-on-1 chat.
 
 ## The scripts
 
+- `install.sh`: sets up a new laptop (see above). It is safe to run again.
 - `up.sh`: starts Mattermost. It puts the passwords in `.env` if they are not there yet.
 - `setup.sh`: makes a team, its site room, the demo people, the bot and its token. It is safe to run again.
 - `brand.sh`: the OpenBook look: the name OpenBook, its colors for everyone, the bot as Mira Belle with its
