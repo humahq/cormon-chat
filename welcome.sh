@@ -2,7 +2,7 @@
 # Posts the welcome guide in a team's site room, from Huma Bot, and pins it: who is who, and messages to try.
 #   ./welcome.sh                 the team in bot.yaml (huma-demo)
 #   ./welcome.sh acme-demo       another team (setup.sh runs this for each new team)
-# Posted once per room; run again, it does nothing. The bot never reads its own posts, so this starts no AI work.
+# Posted once per room; run again, it updates the pinned guide to this text. The bot never reads its own posts, so this starts no AI work.
 set -euo pipefail
 cd "$(dirname "$0")"
 set -a; . ./.env; set +a
@@ -16,10 +16,10 @@ API=http://localhost:8065/api/v4
 get() { curl -fsS -H "Authorization: Bearer $MM_BOT_TOKEN" "$API$1"; }
 
 CHANNEL=$(get "/teams/name/$TEAM/channels/name/site-01-mgh" | python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])')
-if get "/channels/$CHANNEL/pinned" | grep -q "Welcome to the Huma Bot demo"; then
-  echo "The welcome guide is already pinned in $TEAM's site room."
-  exit 0
-fi
+PINNED=$(get "/channels/$CHANNEL/pinned" | python3 -c '
+import json, sys
+posts = json.load(sys.stdin).get("posts", {})
+print(next((p["id"] for p in posts.values() if "Welcome to the Huma Bot demo" in p["message"]), ""))')
 
 IFS= read -r -d '' MESSAGE <<EOF || true
 #### Welcome to the Huma Bot demo
@@ -27,11 +27,11 @@ I watch this room for problems in the ALS study NCT05842941, and I answer questi
 Sign in as different people to see what each one sees. They all use the same password.
 
 **Who is who**
-- Sam Coordinator (\`crc$TAG\`): the site's study coordinator
-- Dana Investigator (\`pi$TAG\`): the site's principal investigator
-- Chris Monitor (\`cra$TAG\`): the CRA, who looks after this site
-- Pat Sponsor (\`sponsor$TAG\`): the sponsor's study team
-- Morgan Medical Monitor (\`medmonitor$TAG\`): checks safety
+- \`crc$TAG\`: the site's study coordinator
+- \`pi$TAG\`: the site's principal investigator
+- \`cra$TAG\`: the CRA, who looks after this site
+- \`sponsor$TAG\`: the sponsor's study team
+- \`medmonitor$TAG\`: the medical monitor, who checks safety
 
 **Try these.** Sign in as \`crc$TAG\` and post them here, one at a time.
 1. **Ask a question:** \`@huma-bot what is the visit window for Week 16?\`
@@ -46,6 +46,14 @@ Sign in as different people to see what each one sees. They all use the same pas
 
 While I work you'll see "Huma Bot is typing…". Each alert has a link to a page with the details.
 EOF
+
+if [ -n "$PINNED" ]; then
+  python3 -c 'import json,sys; print(json.dumps({"message": sys.argv[1]}))' "$MESSAGE" |
+    curl -fsS -X PUT -H "Authorization: Bearer $MM_BOT_TOKEN" -H "Content-Type: application/json" -d @- \
+      "$API/posts/$PINNED/patch" >/dev/null
+  echo "Updated the pinned welcome guide in $TEAM's site room."
+  exit 0
+fi
 
 POST=$(python3 -c 'import json,sys; print(json.dumps({"channel_id": sys.argv[1], "message": sys.argv[2]}))' "$CHANNEL" "$MESSAGE" |
   curl -fsS -X POST -H "Authorization: Bearer $MM_BOT_TOKEN" -H "Content-Type: application/json" -d @- "$API/posts" |
