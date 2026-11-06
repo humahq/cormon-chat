@@ -22,13 +22,14 @@ quiet mm team create --name "$TEAM" --display-name "$TEAM_NAME" --private
 quiet mm config set ServiceSettings.TimeBetweenUserTypingUpdatesMilliseconds 1000
 
 # username | first name | last name | study role (for the bot's people list)
+# The study roles have no names: made-up names confused people, so they go by their sign-in name (crc, pi, ...)
 PEOPLE="
 admin|Demo|Admin|admin
-crc|Sam|Coordinator|crc
-pi|Dana|Investigator|pi
-cra|Chris|Monitor|cra
-sponsor|Pat|Sponsor|clinops_lead
-medmonitor|Morgan|Medical Monitor|medical_monitor
+crc|||crc
+pi|||pi
+cra|||cra
+sponsor|||clinops_lead
+medmonitor|||medical_monitor
 eliot|Eliot|Levitt|tester
 peter|Peter|Brown|tester
 john|John|Rohit|tester
@@ -48,7 +49,7 @@ while IFS='|' read -r user first last role; do
     quiet mm team users add "$TEAM" "$user"
     continue
   fi
-  [ -n "$TAG" ] && { quiet mm team users remove "$TEAM" "$user"; last="$last ($TEAM_NAME)"; }
+  [ -n "$TAG" ] && { quiet mm team users remove "$TEAM" "$user"; [ -n "$first" ] && last="$last ($TEAM_NAME)"; }
   quiet mm user create --username "$user$TAG" --email "$user$TAG@demo.local" --password "$DEMO_PASSWORD" \
     --firstname "$first" --lastname "$last"
   quiet mm user verify "$user$TAG"
