@@ -62,12 +62,13 @@ quiet mm channel create --team "$TEAM" --name site-01-mgh --display-name "Site 0
 mm channel users add "$TEAM:site-01-mgh" $STAFF >/dev/null 2>&1 || true
 
 # mmctl cannot make a bot in local mode, so the bot starts as a user and is converted
-# (servers set up before the rename: the bot "cormon" is renamed, keeping its token and chats)
-quiet mm bot update cormon --username huma-bot --display-name "Huma Bot"
-BOT=huma-bot
-quiet mm user create --username "$BOT" --email huma-bot@demo.local --password "$DEMO_PASSWORD" --firstname Huma --lastname Bot
+# (servers set up before a rename: the bot "cormon" or "huma-bot" is renamed, keeping its token and chats)
+BOT=mira
+quiet mm bot update cormon --username "$BOT"
+quiet mm bot update huma-bot --username "$BOT"
+quiet mm user create --username "$BOT" --email mira@demo.local --password "$DEMO_PASSWORD" --firstname Mira --lastname Belle
 quiet mm user convert "$BOT" --bot
-quiet mm bot update "$BOT" --display-name "Huma Bot"
+quiet mm bot update "$BOT" --display-name "Mira Belle"
 quiet mm team users add "$TEAM" "$BOT"
 quiet mm channel users add "$TEAM:site-01-mgh" "$BOT"
 # Mattermost puts every team member in Town Square and Off-Topic: that is an all-hands room, so the bot leaves
@@ -77,13 +78,14 @@ quiet mm channel users remove "$TEAM:off-topic" "$BOT"
 quiet mm channel archive "$TEAM:off-topic"
 
 if ! grep -q '^MM_BOT_TOKEN=' .env; then
-  token=$(mm token generate "$BOT" "huma bot" --json | sed -n 's/.*"token": *"\([^"]*\)".*/\1/p')
+  token=$(mm token generate "$BOT" "mira" --json | sed -n 's/.*"token": *"\([^"]*\)".*/\1/p')
   [ -n "$token" ] || { echo "could not make the bot token" >&2; exit 1; }
   echo "MM_BOT_TOKEN=$token" >> .env
   echo "MM_URL=http://localhost:8065" >> .env
 fi
 
 set -a; . ./.env; set +a
+./brand.sh || echo "Could not put on the OpenBook look; run ./brand.sh later" >&2
 ./welcome.sh "$TEAM" || echo "Could not pin the welcome guide; run ./welcome.sh $TEAM later" >&2
 
 echo "Done: team $TEAM. Open http://localhost:8065 and sign in as any of:$STAFF (or admin)"

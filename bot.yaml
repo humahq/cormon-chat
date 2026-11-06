@@ -1,6 +1,7 @@
 # Read by the bot's `cormon chat-demo`: which rooms each study uses and which study person each demo user is.
 # A demo user not listed here is someone the study does not know, so the bot treats them as an outsider.
 team: huma-demo
+bot_name: Mira Belle   # as people see it: @mira in the chat, and in the bot's email and admin page
 
 rooms:          # study -> its rooms (channel names in the team, as made by setup.sh); no all-hands room
   NCT05842941:

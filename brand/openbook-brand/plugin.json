@@ -1,0 +1,10 @@
+{
+  "id": "openbook-brand",
+  "name": "OpenBook look",
+  "description": "Shows OpenBook where Mattermost shows its own logo and edition, and OpenBook's icon in the browser tab.",
+  "version": "1.0.0",
+  "min_server_version": "9.0.0",
+  "webapp": {
+    "bundle_path": "webapp/main.js"
+  }
+}

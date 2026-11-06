@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Posts the welcome guide in a team's site room, from Huma Bot, and pins it: who is who, and messages to try.
+# Posts the welcome guide in a team's site room, from the bot (Mira Belle), and pins it: who is who, and messages to try.
 #   ./welcome.sh                 the team in bot.yaml (huma-demo)
 #   ./welcome.sh acme-demo       another team (setup.sh runs this for each new team)
 # Posted once per room; run again, it updates the pinned guide to this text. The bot never reads its own posts, so this starts no AI work.
@@ -19,11 +19,12 @@ CHANNEL=$(get "/teams/name/$TEAM/channels/name/site-01-mgh" | python3 -c 'import
 PINNED=$(get "/channels/$CHANNEL/pinned" | python3 -c '
 import json, sys
 posts = json.load(sys.stdin).get("posts", {})
-print(next((p["id"] for p in posts.values() if "Welcome to the Huma Bot demo" in p["message"]), ""))')
+print(next((p["id"] for p in posts.values()
+            if "Welcome to the OpenBook demo" in p["message"] or "Welcome to the Huma Bot demo" in p["message"]), ""))')
 
 IFS= read -r -d '' MESSAGE <<EOF || true
-#### Welcome to the Huma Bot demo
-I watch this room for problems in the ALS study NCT05842941, and I answer questions about its documents.
+#### Welcome to the OpenBook demo
+I'm Mira Belle. I watch this room for problems in the ALS study NCT05842941, and I answer questions about its documents.
 Sign in as different people to see what each one sees. They all use the same password.
 
 **Who is who**
@@ -34,19 +35,19 @@ Sign in as different people to see what each one sees. They all use the same pas
 - \`medmonitor$TAG\`: the medical monitor, who checks safety
 
 **Try these.** Sign in as \`crc$TAG\` and post them here, one at a time.
-1. **Ask a question:** \`@huma-bot what is the visit window for Week 16?\`
+1. **Ask a question:** \`@mira what is the visit window for Week 16?\`
 2. **Report a problem:** \`1001-901 was randomized this morning. He only started riluzole 10 days ago.\`
    The study needs 30 days on a stable dose first. I don't post this alert here: the PI can read this room, and
    eligibility is the doctor's call, so I send it privately to the CRA and the sponsor.
-   To see it, sign in as \`cra$TAG\` or \`sponsor$TAG\` and open the 1-on-1 chat with Huma Bot.
+   To see it, sign in as \`cra$TAG\` or \`sponsor$TAG\` and open the 1-on-1 chat with Mira Belle.
 3. **A second-hand OK:** \`1001-902 Week 8 done except the C-SSRS, we ran out of time. Dr. Smith from the sponsor said it's fine to skip it this once.\`
    I flag the missed C-SSRS. An OK passed on by someone else is not enough; I ask to hear it from the sponsor.
 4. **Memory:** first post \`1001-903 told me she takes St. John's wort every morning.\`
    Then post \`1001-903 had her baseline visit today, first dose given.\`
    I remember the first message, so I flag the second: St. John's wort is not allowed with the study drug.
-5. **Talk to me alone:** open a 1-on-1 chat with Huma Bot and ask anything about the study.
+5. **Talk to me alone:** open a 1-on-1 chat with Mira Belle and ask anything about the study.
 
-While I work you'll see "Huma Bot is typing…". Each alert has a link to a page with the details.
+While I work you'll see "Mira Belle is typing…". Each alert has a link to a page with the details.
 EOF
 
 if [ -n "$PINNED" ]; then

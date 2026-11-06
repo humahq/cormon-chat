@@ -10,6 +10,7 @@ BOT_DIR=${BOT_DIR:-"$HOME/Documents/clinical trial"}
 podman machine start >/dev/null 2>&1 || true
 ./up.sh || { echo "Mattermost did not start. Press Return to close."; read -r; exit 1; }
 grep -q '^MM_BOT_TOKEN=' .env || ./setup.sh
+./brand.sh || echo "The OpenBook look was not put on; the demo works without it."
 
 # patient memory (Hindsight) in Podman, made the first time by the bot's deploy/hindsight.sh
 memory_up() { curl -sf http://127.0.0.1:8888/health >/dev/null; }

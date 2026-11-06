@@ -1,6 +1,7 @@
 # cormon-chat
 
-A chat server on your own laptop, for demos and tests of Huma Bot. It is Mattermost, running in Podman. Nothing
+A chat server on your own laptop, for demos and tests of OpenBook and its bot, Mira Belle. It is Mattermost, in
+OpenBook's look, running in Podman. Nothing
 goes to the cloud except the bot's calls to OpenAI, and the demo people need no real email addresses.
 
 The bot's code is in its own repo, [correspondence-monitor](https://github.com/humahq/correspondence-monitor).
@@ -73,7 +74,7 @@ bot's folder.
 ## Rooms
 
 There is one private room per site, `Site 01 (MGH)`. It holds the CRA, the site staff and the sponsor, with the
-medical monitor for safety. There is no room with everyone in it. The bot, `@huma-bot` (Huma Bot), is in the site
+medical monitor for safety. There is no room with everyone in it. The bot, `@mira` (Mira Belle), is in the site
 room. You can also talk to it alone in a 1-on-1 chat.
 
 ## Stop
@@ -85,8 +86,11 @@ room. You can also talk to it alone in a 1-on-1 chat.
 
 ## The scripts
 
-- `up.sh`: starts Mattermost. The first time, it makes `.env` with the passwords.
+- `up.sh`: starts Mattermost. It puts the passwords in `.env` if they are not there yet.
 - `setup.sh`: makes a team, its site room, the demo people, the bot and its token. It is safe to run again.
-- `welcome.sh`: pins the welcome guide in a team's site room, once.
+- `brand.sh`: the OpenBook look: the name OpenBook, its colors for everyone, the bot as Mira Belle with its
+  picture, and a small plugin (`brand/openbook-brand`) that shows OpenBook where Mattermost shows its logo. Start
+  demo runs it each time. A few Mattermost words stay, such as in the About box.
+- `welcome.sh`: pins the welcome guide in a team's site room, or updates it.
 - `down.sh`: stops Mattermost.
 - `bot.yaml`: which room each study uses, and which study person each demo person is.
