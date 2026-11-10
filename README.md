@@ -74,6 +74,8 @@ Paste each block, press Return, and wait for it to finish before the next one.
 
 If something goes wrong:
 - Podman may print "the system helper service is not installed". That is fine; the demo doesn't need it.
+- "Another Podman machine is running": a Mac runs one Podman machine at a time. Answer yes to stop the other one;
+  its containers and data are kept, and `podman machine start <its name>` starts it again later.
 - "Could not download the bot": you have not accepted the invite to humahq/correspondence-monitor yet. Accept it,
   then run `./install.sh` again.
 - "OpenAI did not accept that key": copy the whole key again, from `sk-` to the end.

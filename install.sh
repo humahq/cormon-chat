@@ -62,7 +62,17 @@ if [ "$OS" = Darwin ]; then
   if [ -n "$MACHINE" ]; then
     podman machine inspect "$MACHINE" >/dev/null 2>&1 ||
       podman machine init "$MACHINE" --cpus 4 --memory 6144 --disk-size 40
+    # a Mac runs one Podman machine at a time, so another one that is running has to stop first
+    OTHER=$(podman machine list --format '{{.Name}}|{{.Running}}' | tr -d '*' |
+            awk -F'|' -v m="$MACHINE" '$2 == "true" && $1 != m {print $1}')
+    if [ -n "$OTHER" ]; then
+      yes_no "Another Podman machine, $OTHER, is running, and a Mac runs only one at a time. Stop it now? (Its containers and data are kept.)" ||
+        fail "The demo needs its own machine. Stop the other one (podman machine stop $OTHER), then run ./install.sh again."
+      podman machine stop "$OTHER" >/dev/null
+    fi
     podman machine start "$MACHINE" 2>&1 | grep -v -i "helper\|docker\|socket\|API forwarding" || true
+    [ "$(podman machine inspect "$MACHINE" --format '{{.State}}' 2>/dev/null)" = running ] ||
+      fail "Podman's machine $MACHINE did not start. Run ./install.sh again; if it stops here again, send John a screenshot."
     export CONTAINER_CONNECTION=$MACHINE
   else
     podman machine start >/dev/null 2>&1 || true
