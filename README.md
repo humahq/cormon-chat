@@ -62,8 +62,20 @@ patient memory and the bot, then opens:
 
 Keep its window open during the demo. Closing it stops the bot.
 
-**Sign in** as `crc`, `pi`, `cra`, `sponsor` or `medmonitor`. They all use the same password, `DEMO_PASSWORD` in
-`cormon-chat/.env`. `admin` is the server's administrator.
+**Sign in** as one of the study people:
+
+| Name | Who it is |
+|---|---|
+| `crc` | the site's study coordinator |
+| `pi` | the site's doctor in charge of the study |
+| `cra` | the sponsor's monitor who visits the site |
+| `sponsor` | the sponsor's study lead |
+| `medmonitor` | the sponsor's medical monitor |
+| `eliot`, `peter`, `john` | testers |
+
+They all use the same password. It is made when you install, so it is different on each laptop, and it is shown
+in the demo's window each time the demo starts (it is also `DEMO_PASSWORD` in `cormon-chat/.env`). `admin` is the
+server's administrator.
 
 **The welcome guide** is pinned in the site room. It says who is who, and gives messages to try: a question, a
 problem the bot catches, a second-hand OK it doesn't accept, and a fact it remembers. To see it, open
