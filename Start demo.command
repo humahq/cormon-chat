@@ -16,9 +16,18 @@ if [ "$(uname -s)" = Darwin ] && [ -n "${PODMAN_MACHINE:-}" ]; then
     [[ "$a" =~ ^[Nn] ]] && exit 1
     podman machine stop "$OTHER" >/dev/null
   fi
-  podman machine start "$PODMAN_MACHINE" >/dev/null 2>&1 || true
-elif [ "$(uname -s)" = Darwin ]; then
-  podman machine start >/dev/null 2>&1 || true
+fi
+if [ "$(uname -s)" = Darwin ]; then
+  M=(${PODMAN_MACHINE:+"$PODMAN_MACHINE"})   # none: Podman's default machine
+  state() { podman machine inspect "${M[@]}" --format '{{.State}}' 2>/dev/null; }
+  # the first start after the laptop shut down without stopping it can fail; the second works
+  for _ in 1 2; do
+    [ "$(state)" = running ] && break
+    podman machine start "${M[@]}" >/dev/null 2>&1 || sleep 3
+  done
+  [ "$(state)" = running ] ||
+    { echo "Podman's machine did not start. Run: podman machine start ${PODMAN_MACHINE:-}"
+      echo "and send John what it says. Press Return to close."; read -r; exit 1; }
 fi
 ./up.sh || { echo "Mattermost did not start. Press Return to close."; read -r; exit 1; }
 grep -q '^MM_BOT_TOKEN=' .env || ./setup.sh
