@@ -18,9 +18,17 @@ home folder, and starts it. It asks only for:
 - your OpenAI key (from https://platform.openai.com/api-keys; nothing shows as you paste). It checks the key
   with OpenAI before saving it.
 
-It takes about 20 minutes the first time, most of it downloading. At the end it prints "All set", the sign-in
-names and the password, and your browser opens the demo. Keep the Terminal window open; closing it stops the bot.
-You can run the same line again at any time; it keeps what is there.
+It takes about 20 minutes the first time, most of it downloading. At the end your browser opens the demo, and
+the Terminal window shows the sign-in names and the password, like this:
+```
+  Sign in at http://localhost:8065 as crc, pi, cra, sponsor, medmonitor, eliot, peter or john
+  Password:  Demo-3fa91c0b2e7d!
+```
+Sign in with one of those names (for example `crc`) and that password. The password is made on your laptop, so it
+is different for each person. Keep the Terminal window open; closing it stops the bot.
+
+To start the demo again later (for example after a restart), paste the same line again. It keeps what is there,
+skips the install, and shows the password again.
 
 You need a Mac (or Linux laptop) with 16 GB of memory and 20 GB of free disk.
 
