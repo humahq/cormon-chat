@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Double-click to start a demo: Podman, Mattermost, the bot and the demo page. Close this window to stop the bot.
 # Run ./install.sh once first. The bot's folder is BOT_DIR in .env (install.sh sets it).
-cd "$(dirname "$0")"
+cd "$(dirname "$0")" || exit 1
 CHAT=$PWD
 [ -f .env ] && { set -a; . ./.env; set +a; }
 BOT_DIR=${BOT_DIR:-"$HOME/Documents/clinical trial"}
@@ -41,6 +41,13 @@ if ! memory_up; then
     echo "Patient memory did not start; the demo runs without it."
 fi
 
+cat <<EOF
+
+  Sign in at http://localhost:8065 as crc, pi, cra, sponsor, medmonitor, eliot, peter or john
+  Password:  ${DEMO_PASSWORD:-}
+  Demo teams: http://localhost:8090      Keep this window open; closing it stops the bot.
+
+EOF
 OPEN=$(command -v open || command -v xdg-open || echo true)
 (sleep 15; "$OPEN" http://localhost:8090; "$OPEN" http://localhost:8065) >/dev/null 2>&1 &
 cd "$BOT_DIR" && exec .venv/bin/cormon chat-demo --chat "$CHAT"

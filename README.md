@@ -18,9 +18,17 @@ home folder, and starts it. It asks only for:
 - your OpenAI key (from https://platform.openai.com/api-keys; nothing shows as you paste). It checks the key
   with OpenAI before saving it.
 
-It takes about 20 minutes the first time, most of it downloading. At the end it prints "All set", the sign-in
-names and the password, and your browser opens the demo. Keep the Terminal window open; closing it stops the bot.
-You can run the same line again at any time; it keeps what is there.
+It takes about 20 minutes the first time, most of it downloading. At the end your browser opens the demo, and
+the Terminal window shows the sign-in names and the password, like this:
+```
+  Sign in at http://localhost:8065 as crc, pi, cra, sponsor, medmonitor, eliot, peter or john
+  Password:  Demo-3fa91c0b2e7d!
+```
+Sign in with one of those names (for example `crc`) and that password. The password is made on your laptop, so it
+is different for each person. Keep the Terminal window open; closing it stops the bot.
+
+To start the demo again later (for example after a restart), paste the same line again. It keeps what is there,
+skips the install, and shows the password again.
 
 You need a Mac (or Linux laptop) with 16 GB of memory and 20 GB of free disk.
 
@@ -62,8 +70,20 @@ patient memory and the bot, then opens:
 
 Keep its window open during the demo. Closing it stops the bot.
 
-**Sign in** as `crc`, `pi`, `cra`, `sponsor` or `medmonitor`. They all use the same password, `DEMO_PASSWORD` in
-`cormon-chat/.env`. `admin` is the server's administrator.
+**Sign in** as one of the study people:
+
+| Name | Who it is |
+|---|---|
+| `crc` | the site's study coordinator |
+| `pi` | the site's doctor in charge of the study |
+| `cra` | the sponsor's monitor who visits the site |
+| `sponsor` | the sponsor's study lead |
+| `medmonitor` | the sponsor's medical monitor |
+| `eliot`, `peter`, `john` | testers |
+
+They all use the same password. It is made when you install, so it is different on each laptop, and it is shown
+in the demo's window each time the demo starts (it is also `DEMO_PASSWORD` in `cormon-chat/.env`). `admin` is the
+server's administrator.
 
 **The welcome guide** is pinned in the site room. It says who is who, and gives messages to try: a question, a
 problem the bot catches, a second-hand OK it doesn't accept, and a fact it remembers. To see it, open
