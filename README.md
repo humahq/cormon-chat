@@ -8,74 +8,46 @@ The bot's code is in its own repo, [correspondence-monitor](https://github.com/h
 
 ## Set up a new laptop (once)
 
-You need:
-- a Mac, or a Linux laptop with Ubuntu or Fedora, with 16 GB of memory and 20 GB of free disk;
-- an OpenAI API key (from https://platform.openai.com/api-keys);
-- a GitHub account.
+**On a Mac:** open **Terminal** (press Cmd+Space, type `Terminal`, press Return), paste this line and press Return:
+```
+curl -fsSL https://raw.githubusercontent.com/humahq/cormon-chat/main/Install%20OpenBook.command | bash
+```
+It does everything by itself: it installs the tools, downloads the demo into a folder named `OpenBook` in your
+home folder, and starts it. It asks only for:
+- your Mac password, if Homebrew is not installed yet (nothing shows as you type);
+- your OpenAI key (from https://platform.openai.com/api-keys; nothing shows as you paste). It checks the key
+  with OpenAI before saving it.
 
-Both repos are private. John adds your GitHub account to **humahq/cormon-chat** and
-**humahq/correspondence-monitor**. GitHub emails you an invite for each. Open both emails and click **Accept**.
+It takes about 20 minutes the first time, most of it downloading. At the end it prints "All set", the sign-in
+names and the password, and your browser opens the demo. Keep the Terminal window open; closing it stops the bot.
+You can run the same line again at any time; it keeps what is there.
 
-All the steps below are typed in **Terminal**. On a Mac, press Cmd+Space, type `Terminal` and press Return.
-Paste each block, press Return, and wait for it to finish before the next one.
+You need a Mac (or Linux laptop) with 16 GB of memory and 20 GB of free disk.
 
-1. **Install Homebrew and the GitHub tool.**
+**On Linux (Ubuntu or Fedora):**
+```
+sudo apt install git     # or: sudo dnf install git
+mkdir -p ~/code && cd ~/code
+git clone https://github.com/humahq/cormon-chat.git
+cd cormon-chat
+./install.sh
+```
+It asks for your OpenAI key, a demo password (press Return to get one made for you), and yes or no before it
+installs a tool you don't have yet. Then start the demo as in [Run a demo](#run-a-demo) below.
 
-   On a Mac:
-   ```
-   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-   ```
-   It asks for your laptop password (nothing shows as you type) and to press Return. It takes a few minutes.
-   Then:
-   ```
-   echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
-   eval "$(/opt/homebrew/bin/brew shellenv)"
-   brew install gh
-   ```
-   If you already have Homebrew, run only `brew install gh`. On an older Mac with an Intel chip, skip the two
-   lines that start with `echo` and `eval`.
-
-   On Linux: `sudo apt install git gh` (Ubuntu) or `sudo dnf install git gh` (Fedora).
-
-2. **Sign in to GitHub.**
-   ```
-   gh auth login --hostname github.com --git-protocol https --web
-   ```
-   If it asks "Authenticate Git with your GitHub credentials?", answer **Yes**. It shows a short code, like
-   `AB12-CD34`. Press Return, and your browser opens GitHub. Sign in, type the code and click **Authorize**.
-
-3. **Download the demo and run the installer.**
-   ```
-   mkdir -p ~/code && cd ~/code
-   gh repo clone humahq/cormon-chat
-   cd cormon-chat
-   ./install.sh
-   ```
-   This puts it in a folder named `code` in your home folder. Any folder works, but not one that syncs to
-   iCloud, such as Documents or Desktop on many Macs.
-
-4. **Answer the installer's questions.** It asks only for:
-   - your OpenAI key (paste it; nothing shows as you paste). It checks the key with OpenAI before saving it;
-   - a password for signing in to the demo, or press Return to get one made for you;
-   - yes or no, before it installs a tool you don't have yet.
-
-   It takes about 15 minutes the first time, most of it downloading. What it does:
-   - installs Podman, uv and git if they are missing (Homebrew on a Mac, apt or dnf on Linux);
-   - on a Mac, makes a Podman machine of its own, named `openbook` (4 CPUs, 6 GB), so it doesn't touch any other
-     Podman machine you have;
-   - downloads the bot's code next to this folder, as `correspondence-monitor`, unless it finds it already;
-   - writes both `.env` files (the bot's key, the passwords, and where the bot is), readable only by you;
-   - starts Mattermost and patient memory, and makes the team, the site room, the demo people and the bot.
-
-   At the end it prints "All set", the sign-in names and the password. You can run it again at any time; it
-   keeps what is there and only asks for what is missing or wrong.
-
-5. **Start the demo** as in [Run a demo](#run-a-demo) below.
+What the installer does:
+- installs Podman, uv and git if they are missing (Homebrew on a Mac, apt or dnf on Linux);
+- on a Mac, makes a Podman machine of its own, named `openbook` (4 CPUs, 6 GB), so it doesn't touch any other
+  Podman machine you have;
+- downloads the bot's code next to this folder, as `correspondence-monitor`, unless it finds it already;
+- writes both `.env` files (the bot's key, the passwords, and where the bot is), readable only by you;
+- starts Mattermost and patient memory, and makes the team, the site room, the demo people and the bot.
 
 If something goes wrong:
 - Podman may print "the system helper service is not installed". That is fine; the demo doesn't need it.
-- "Could not download the bot": you have not accepted the invite to humahq/correspondence-monitor yet. Accept it,
-  then run `./install.sh` again.
+- "Another Podman machine is running": a Mac runs one Podman machine at a time. The installer stops the other one;
+  its containers and data are kept, and `podman machine start <its name>` starts it again later.
+- "Could not download": check the internet connection, then run it again.
 - "OpenAI did not accept that key": copy the whole key again, from `sk-` to the end.
 - Anything else: run `./install.sh` again. If it stops at the same place, send John a screenshot.
 

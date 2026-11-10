@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Sets up the OpenBook demo on a Mac or a Linux laptop, in one go:
-#   gh repo clone humahq/cormon-chat && cd cormon-chat && ./install.sh     (README: the steps before this)
+#   git clone https://github.com/humahq/cormon-chat.git && cd cormon-chat && ./install.sh
 # It installs the tools, gets the bot's code next to this folder, asks for the OpenAI key (and checks it), makes
 # the passwords, and starts Mattermost, the demo people and the bot's look. Safe to run again: what is already
 # there is kept, and it only asks what it does not know yet.
@@ -11,7 +11,8 @@ OS=$(uname -s)
 
 say() { printf '\n\033[1m%s\033[0m\n' "$*"; }
 fail() { printf '\n\033[31m%s\033[0m\n' "$*" >&2; exit 1; }
-yes_no() { local a; read -r -p "$1 [Y/n] " a || true; [[ ! "$a" =~ ^[Nn] ]]; }
+# OPENBOOK_AUTO=1 (set by "Install OpenBook.command"): every yes/no is yes, and the demo password is made for you
+yes_no() { local a; [ -n "${OPENBOOK_AUTO:-}" ] && { echo "$1 yes"; return 0; }; read -r -p "$1 [Y/n] " a || true; [[ ! "$a" =~ ^[Nn] ]]; }
 getenv() { [ -f "$2" ] && sed -n "s/^$1=//p" "$2" | tail -1 | sed "s/^[\"']//; s/[\"']\$//"; true; }
 setenv() {   # setenv FILE KEY VALUE: one KEY= line in FILE, with this value
   local f=$1 k=$2 v=$3
@@ -62,7 +63,17 @@ if [ "$OS" = Darwin ]; then
   if [ -n "$MACHINE" ]; then
     podman machine inspect "$MACHINE" >/dev/null 2>&1 ||
       podman machine init "$MACHINE" --cpus 4 --memory 6144 --disk-size 40
+    # a Mac runs one Podman machine at a time, so another one that is running has to stop first
+    OTHER=$(podman machine list --format '{{.Name}}|{{.Running}}' | tr -d '*' |
+            awk -F'|' -v m="$MACHINE" '$2 == "true" && $1 != m {print $1}')
+    if [ -n "$OTHER" ]; then
+      yes_no "Another Podman machine, $OTHER, is running, and a Mac runs only one at a time. Stop it now? (Its containers and data are kept.)" ||
+        fail "The demo needs its own machine. Stop the other one (podman machine stop $OTHER), then run ./install.sh again."
+      podman machine stop "$OTHER" >/dev/null
+    fi
     podman machine start "$MACHINE" 2>&1 | grep -v -i "helper\|docker\|socket\|API forwarding" || true
+    [ "$(podman machine inspect "$MACHINE" --format '{{.State}}' 2>/dev/null)" = running ] ||
+      fail "Podman's machine $MACHINE did not start. Run ./install.sh again; if it stops here again, send John a screenshot."
     export CONTAINER_CONNECTION=$MACHINE
   else
     podman machine start >/dev/null 2>&1 || true
@@ -84,9 +95,8 @@ done
 if [ -z "$BOT_DIR" ]; then
   BOT_DIR=$(cd "$CHAT/.." && pwd)/correspondence-monitor
   echo "Downloading it to $BOT_DIR"
-  if command -v gh >/dev/null; then got() { gh repo clone humahq/correspondence-monitor "$BOT_DIR"; }
-  else got() { GIT_TERMINAL_PROMPT=0 git clone https://github.com/humahq/correspondence-monitor.git "$BOT_DIR"; }; fi
-  got || fail "Could not download the bot. Check that you accepted John's GitHub invite to humahq/correspondence-monitor, then run ./install.sh again."
+  GIT_TERMINAL_PROMPT=0 git clone -q https://github.com/humahq/correspondence-monitor.git "$BOT_DIR" ||
+    fail "Could not download the bot. Check that you can open https://github.com/humahq/correspondence-monitor, then run ./install.sh again."
 fi
 setenv .env BOT_DIR "$BOT_DIR"
 (cd "$BOT_DIR" && env -u VIRTUAL_ENV uv sync -q)
@@ -123,6 +133,7 @@ say "5/6  The passwords"
 grep -q '^DB_PASSWORD=.' .env 2>/dev/null || setenv .env DB_PASSWORD "$(openssl rand -hex 16)"
 echo "The database password is made for you; you never need to type it."
 DEMO=$(getenv DEMO_PASSWORD .env)
+[ -z "$DEMO" ] && [ -n "${OPENBOOK_AUTO:-}" ] && { DEMO="Demo-$(openssl rand -hex 6)!"; setenv .env DEMO_PASSWORD "$DEMO"; }
 if [ -z "$DEMO" ]; then
   while true; do
     read -r -p "Pick a password for signing in to the demo (8 or more letters), or press Return for a random one: " DEMO
