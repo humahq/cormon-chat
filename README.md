@@ -8,6 +8,11 @@ The bot's code is in its own repo, [correspondence-monitor](https://github.com/h
 
 ## Set up a new laptop (once)
 
+**On a Mac, the easy way:** double-click `Install OpenBook.command`. It installs everything, signs you in to
+GitHub, downloads the demo, and starts it. It asks only for your Mac password (if Homebrew is not installed),
+the GitHub sign-in in your browser, and your OpenAI key. The first time, macOS may block it: right-click it and
+choose **Open**.
+
 You need:
 - a Mac, or a Linux laptop with Ubuntu or Fedora, with 16 GB of memory and 20 GB of free disk;
 - an OpenAI API key (from https://platform.openai.com/api-keys);

@@ -11,7 +11,8 @@ OS=$(uname -s)
 
 say() { printf '\n\033[1m%s\033[0m\n' "$*"; }
 fail() { printf '\n\033[31m%s\033[0m\n' "$*" >&2; exit 1; }
-yes_no() { local a; read -r -p "$1 [Y/n] " a || true; [[ ! "$a" =~ ^[Nn] ]]; }
+# OPENBOOK_AUTO=1 (set by "Install OpenBook.command"): every yes/no is yes, and the demo password is made for you
+yes_no() { local a; [ -n "${OPENBOOK_AUTO:-}" ] && { echo "$1 yes"; return 0; }; read -r -p "$1 [Y/n] " a || true; [[ ! "$a" =~ ^[Nn] ]]; }
 getenv() { [ -f "$2" ] && sed -n "s/^$1=//p" "$2" | tail -1 | sed "s/^[\"']//; s/[\"']\$//"; true; }
 setenv() {   # setenv FILE KEY VALUE: one KEY= line in FILE, with this value
   local f=$1 k=$2 v=$3
@@ -133,6 +134,7 @@ say "5/6  The passwords"
 grep -q '^DB_PASSWORD=.' .env 2>/dev/null || setenv .env DB_PASSWORD "$(openssl rand -hex 16)"
 echo "The database password is made for you; you never need to type it."
 DEMO=$(getenv DEMO_PASSWORD .env)
+[ -z "$DEMO" ] && [ -n "${OPENBOOK_AUTO:-}" ] && { DEMO="Demo-$(openssl rand -hex 6)!"; setenv .env DEMO_PASSWORD "$DEMO"; }
 if [ -z "$DEMO" ]; then
   while true; do
     read -r -p "Pick a password for signing in to the demo (8 or more letters), or press Return for a random one: " DEMO
