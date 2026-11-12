@@ -14,6 +14,22 @@ fail() { printf '\n\033[31m%s\033[0m\n' "$*" >&2; exit 1; }
 # OPENBOOK_AUTO=1 (set by "Install OpenBook.command"): every yes/no is yes, and the demo password is made for you
 yes_no() { local a; [ -n "${OPENBOOK_AUTO:-}" ] && { echo "$1 yes"; return 0; }; read -r -p "$1 [Y/n] " a || true; [[ ! "$a" =~ ^[Nn] ]]; }
 getenv() { [ -f "$2" ] && sed -n "s/^$1=//p" "$2" | tail -1 | sed "s/^[\"']//; s/[\"']\$//"; true; }
+update_repo() {   # update_repo DIR NAME: git-pull only when that cannot lose anything, and say why when it does not
+  local d=$1 n=$2 br behind
+  [ -d "$d/.git" ] || return 0
+  if [ -n "$(git -C "$d" status --porcelain 2>/dev/null)" ]; then
+    echo "Not updating $n: it has changes of yours that are not saved in git."; return 0; fi
+  br=$(git -C "$d" symbolic-ref -q --short HEAD) || { echo "Not updating $n: it is not on a branch."; return 0; }
+  git -C "$d" rev-parse -q --verify '@{u}' >/dev/null 2>&1 ||
+    { echo "Not updating $n: branch $br does not follow a branch on GitHub."; return 0; }
+  GIT_TERMINAL_PROMPT=0 git -C "$d" fetch -q 2>/dev/null ||
+    { echo "Could not reach GitHub to update $n; using the one here."; return 0; }
+  behind=$(git -C "$d" rev-list --count 'HEAD..@{u}')
+  if [ "$behind" = 0 ]; then echo "$n is up to date."
+  elif git -C "$d" merge -q --ff-only '@{u}' >/dev/null 2>&1; then echo "$n updated ($behind new changes)."
+  else echo "Not updating $n: your branch $br and GitHub both have new work. Update it by hand."; fi
+  return 0
+}
 setenv() {   # setenv FILE KEY VALUE: one KEY= line in FILE, with this value
   local f=$1 k=$2 v=$3
   [[ "$v" =~ ^[A-Za-z0-9_./:@+-]*$ ]] || v="'$v'"   # .env files are read by the shell too; values have no '
@@ -88,17 +104,21 @@ fi
 say "3/6  The bot's code"
 BOT_DIR=$(getenv BOT_DIR .env)
 for d in "$BOT_DIR" "$CHAT/../correspondence-monitor" "$CHAT/../clinical trial" \
+         "$(getenv OPENBOOK_ROOT .env)/OpenBook/correspondence-monitor" \
          "$HOME/Documents/correspondence-monitor" "$HOME/Documents/clinical trial"; do
   if [ -n "$d" ] && [ -f "$d/pyproject.toml" ] && [ -d "$d/cormon" ]; then BOT_DIR=$(cd "$d" && pwd); break; fi
   BOT_DIR=""
 done
-if [ -z "$BOT_DIR" ]; then
+if [ -n "$BOT_DIR" ]; then
+  update_repo "$BOT_DIR" correspondence-monitor
+else
   BOT_DIR=$(cd "$CHAT/.." && pwd)/correspondence-monitor
   echo "Downloading it to $BOT_DIR"
   GIT_TERMINAL_PROMPT=0 git clone -q https://github.com/humahq/correspondence-monitor.git "$BOT_DIR" ||
     fail "Could not download the bot. Check that you can open https://github.com/humahq/correspondence-monitor, then run ./install.sh again."
 fi
 setenv .env BOT_DIR "$BOT_DIR"
+setenv .env OPENBOOK_ROOT "$(cd "$CHAT/../.." && pwd)"   # <root>/OpenBook/cormon-chat
 (cd "$BOT_DIR" && env -u VIRTUAL_ENV uv sync -q)
 echo "ok ($BOT_DIR)"
 
@@ -164,7 +184,7 @@ elif curl -sf http://127.0.0.1:8888/health >/dev/null && ! podman container exis
   echo "Patient memory runs outside Podman here; if it uses an old OpenAI key, update it there."
 else
   echo "Starting patient memory (the first time downloads about 2 GB)"
-  (cd "$BOT_DIR" && CONTAINER=podman ./deploy/hindsight.sh >/dev/null) ||
+  (cd "$BOT_DIR" && CONTAINER=podman POD=cormon-chat ./deploy/hindsight.sh >/dev/null) ||
     echo "Patient memory did not start; the demo runs without it. \"Start demo\" tries again."
 fi
 

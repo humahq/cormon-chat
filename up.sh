@@ -18,7 +18,20 @@ grep -q '^DEMO_PASSWORD=.' .env ||
   { echo "DEMO_PASSWORD=Demo-$(openssl rand -hex 6)!" >> .env; echo "added the demo users' password to .env (never commit it)"; }
 set -a; . ./.env; set +a
 
-podman pod exists "$POD" || podman pod create --name "$POD" -p 127.0.0.1:8065:8065 >/dev/null
+# The pod holds Mattermost, its database, patient memory (Hindsight) and the bot, which share localhost. It publishes
+# only on this laptop: Mattermost 8065, the bot's alert pages 8091 and Hindsight 8888 (for the checks in "Start demo").
+# A pod made before the bot ran in it lacks the last two, and a pod's ports cannot change: it is made again (the
+# containers go, the data in the Podman volumes stays), and a Hindsight that ran outside the pod is removed (its
+# data volume stays; "Start demo" makes it again, in the pod).
+if podman pod exists "$POD" && ! podman pod inspect "$POD" 2>/dev/null | grep -q '"HostPort": "8888"'; then
+  echo "making the pod again, with the ports for the bot and patient memory (your data is kept)"
+  podman pod rm -f "$POD" >/dev/null
+fi
+if podman container exists hindsight && [ -z "$(podman container inspect hindsight --format '{{.Pod}}' 2>/dev/null)" ]; then
+  podman rm -f hindsight >/dev/null
+fi
+podman pod exists "$POD" || podman pod create --name "$POD" \
+  -p 127.0.0.1:8065:8065 -p 127.0.0.1:8091:8091 -p 127.0.0.1:8888:8888 >/dev/null
 if ! podman container exists cormon-chat-db; then
   podman run -d --pod "$POD" --name cormon-chat-db --restart unless-stopped \
     -e POSTGRES_USER=mmuser -e POSTGRES_PASSWORD="$DB_PASSWORD" -e POSTGRES_DB=mattermost \

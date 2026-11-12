@@ -80,8 +80,10 @@ quiet mm channel archive "$TEAM:off-topic"
 if ! grep -q '^MM_BOT_TOKEN=' .env; then
   token=$(mm token generate "$BOT" "mira" --json | sed -n 's/.*"token": *"\([^"]*\)".*/\1/p')
   [ -n "$token" ] || { echo "could not make the bot token" >&2; exit 1; }
-  echo "MM_BOT_TOKEN=$token" >> .env
-  echo "MM_URL=http://localhost:8065" >> .env
+  # replace, never append to a last line that has no newline: the token would be glued onto it (it once ended up
+  # inside DEMO_PASSWORD), and MM_URL would be written twice
+  { grep -v '^MM_BOT_TOKEN=\|^MM_URL=' .env || true; echo "MM_BOT_TOKEN=$token"; echo "MM_URL=http://localhost:8065"; } > .env.new
+  chmod 600 .env.new && mv .env.new .env
 fi
 
 set -a; . ./.env; set +a
