@@ -54,6 +54,7 @@ cat <<EOF
 
   Sign in at http://localhost:8065 as crc, pi, cra, sponsor, medmonitor, eliot, peter or john
   Password:  ${DEMO_PASSWORD:-}
+  Admin pages: http://localhost:8091/admin   (users operator, peter or eliot; one password, ADMIN_PASSWORD in $CHAT/.env)
   Demo teams: http://localhost:8090      Keep this window open; closing it stops the bot.
 
 EOF

@@ -101,6 +101,12 @@ They all use the same password. It is made when you install, so it is different 
 in the demo's window each time the demo starts (it is also `DEMO_PASSWORD` in `cormon-chat/.env`). `admin` is the
 server's administrator.
 
+**The bot's own pages** (`http://localhost:8091/admin`, and the sign-in on an alert's page) use their own names —
+not the Mattermost ones above: `operator` opens the admin pages, `peter` (a tester) closes an alert and `eliot`
+(a tester and the PI) reviews what peter closed. They share one password, `ADMIN_PASSWORD` in `cormon-chat/.env`
+(never the value itself). To act as another person without logging out, open `/admin/login`. In host mode
+(`OPENBOOK_BOT=host`) the admin pages are on port 8092; the bot says which when it starts.
+
 **The welcome guide** is pinned in the site room. It says who is who, and gives messages to try: a question, a
 problem the bot catches, a second-hand OK it doesn't accept, and a fact it remembers. To see it, open
 **Site 01 (MGH)** and click the pin icon at the top.
