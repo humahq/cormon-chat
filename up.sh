@@ -16,6 +16,8 @@ touch .env
 grep -q '^DB_PASSWORD=.' .env || { echo "DB_PASSWORD=$(openssl rand -hex 16)" >> .env; echo "added the database password to .env"; }
 grep -q '^DEMO_PASSWORD=.' .env ||
   { echo "DEMO_PASSWORD=Demo-$(openssl rand -hex 6)!" >> .env; echo "added the demo users' password to .env (never commit it)"; }
+grep -q '^ADMIN_PASSWORD=.' .env ||
+  { echo "ADMIN_PASSWORD=$(openssl rand -hex 12)" >> .env; echo "added the admin pages' password to .env (never commit it)"; }
 set -a; . ./.env; set +a
 
 # The pod holds Mattermost, its database, patient memory (Hindsight) and the bot, which share localhost. It publishes

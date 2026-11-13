@@ -197,5 +197,6 @@ All set.
                    (on Linux: ./"Start demo.command" in a terminal)
   Mattermost:      http://localhost:8065   sign in as crc, pi, cra, sponsor, medmonitor, eliot, peter or john
   Password:        $DEMO
+  Admin pages:     http://localhost:8091/admin   (users operator, peter or eliot; one password, ADMIN_PASSWORD in $CHAT/.env)
   Demo teams:      http://localhost:8090   (while the demo runs)
 EOF

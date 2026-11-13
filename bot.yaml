@@ -17,3 +17,7 @@ people:         # demo address -> the study person's address in studies/<study>/
   eliot@demo.local: eliot@huma.ai
   peter@demo.local: peter@huma.ai
   john@demo.local: john@huma.ai                            # ClinOps lead
+
+local_accounts:   # names that sign in on this computer (admin pages, alert pages), one shared password (ADMIN_PASSWORD in .env)
+  peter: peter@demo.local   # tester: may close alerts. The operator account has no study role.
+  eliot: eliot@demo.local   # tester and PI: may review what peter closed
